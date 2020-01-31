@@ -1,4 +1,4 @@
-package com.cordutch.server.routes
+package com.arhamill.cortex.routes
 
 import com.arhamill.cortex.handlers.CortexHandler
 import org.springframework.context.annotation.Bean
