@@ -16,6 +16,10 @@ class CortexRouter {
             accept(MediaType.APPLICATION_JSON).nest { POST("/", handler::snapshot) }
             accept(MediaType.TEXT_EVENT_STREAM).nest { POST("/updates", handler::updates) }
         }
+        ("/linear").nest {
+            accept(MediaType.APPLICATION_JSON).nest { POST("/", handler::linearSnapshot) }
+            accept(MediaType.TEXT_EVENT_STREAM).nest { POST("/updates", handler::linearUpdates) }
+        }
         ("/tokens").nest {
             accept(MediaType.APPLICATION_JSON).nest { POST("/", handler::tokenSnapshot) }
             accept(MediaType.TEXT_EVENT_STREAM).nest { POST("/updates", handler::tokenUpdates) }

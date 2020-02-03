@@ -24,7 +24,7 @@ class CortexHandler(rpc: NodeRPCConnection) {
     private val classloader = rpc.cordappClassloader
 
     fun snapshot(request: ServerRequest): Mono<ServerResponse> = request.bodyToMono(String::class.java).flatMap {
-        val clazz = Class.forName(it, true, classloader).asSubclass(LinearState::class.java)
+        val clazz = Class.forName(it, true, classloader).asSubclass(ContractState::class.java)
         ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(toPublisher(Single.just(proxy.vaultQuery(clazz).states.groupStates())),
@@ -32,17 +32,39 @@ class CortexHandler(rpc: NodeRPCConnection) {
     }
 
     fun updates(request: ServerRequest): Mono<ServerResponse> = request.bodyToMono(String::class.java).flatMap {
+        val clazz = Class.forName(it, true, classloader).asSubclass(ContractState::class.java)
+        ok()
+                .contentType(MediaType.TEXT_EVENT_STREAM)
+                .body(toPublisher(
+                        proxy.vaultTrackByCriteria(clazz, QueryCriteria.VaultQueryCriteria(status = Vault.StateStatus.ALL)).updates.map { update ->
+                            ContractStateUpdate(
+                                    consumed = update.consumed.groupStates(),
+                                    produced = update.produced.groupStates()
+                            )
+                        }),
+                        ParameterizedTypeReference.forType(ContractStateUpdate::class.java))
+    }
+
+    fun linearSnapshot(request: ServerRequest): Mono<ServerResponse> = request.bodyToMono(String::class.java).flatMap {
+        val clazz = Class.forName(it, true, classloader).asSubclass(LinearState::class.java)
+        ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(toPublisher(Single.just(proxy.vaultQuery(clazz).states.groupLinearStates())),
+                        ParameterizedTypeReference.forType(Map::class.java))
+    }
+
+    fun linearUpdates(request: ServerRequest): Mono<ServerResponse> = request.bodyToMono(String::class.java).flatMap {
         val clazz = Class.forName(it, true, classloader).asSubclass(LinearState::class.java)
         ok()
                 .contentType(MediaType.TEXT_EVENT_STREAM)
                 .body(toPublisher(
                         proxy.vaultTrackByCriteria(clazz, QueryCriteria.VaultQueryCriteria(status = Vault.StateStatus.ALL)).updates.map { update ->
-                            StateUpdate(
-                                    consumed = update.consumed.groupStates(),
-                                    produced = update.produced.groupStates()
+                            LinearStateUpdate(
+                                    consumed = update.consumed.groupLinearStates(),
+                                    produced = update.produced.groupLinearStates()
                             )
                         }),
-                        ParameterizedTypeReference.forType(StateUpdate::class.java))
+                        ParameterizedTypeReference.forType(LinearStateUpdate::class.java))
     }
 
     fun tokenSnapshot(request: ServerRequest): Mono<ServerResponse> = ok()
@@ -64,9 +86,13 @@ class CortexHandler(rpc: NodeRPCConnection) {
     fun Collection<StateAndRef<FungibleToken>>.sumTokens() = map { it.state.data }
             .groupBy { it.issuedTokenType }.mapValues { it.value.sumTokenStatesOrZero(it.key) }
 
-    fun Collection<StateAndRef<LinearState>>.groupStates() = map { it.state.data.linearId to it.state.data }.toMap()
+    fun Collection<StateAndRef<LinearState>>.groupLinearStates() = map { it.state.data.linearId to it.state.data }.toMap()
+
+    fun Collection<StateAndRef<ContractState>>.groupStates() = map { it.ref to it.state.data }.toMap()
 }
 
 class TokenUpdate(val consumed: Map<IssuedTokenType, Amount<IssuedTokenType>>, val produced: Map<IssuedTokenType, Amount<IssuedTokenType>>)
 
-class StateUpdate(val consumed: Map<UniqueIdentifier, ContractState>, val produced: Map<UniqueIdentifier, ContractState>)
+class LinearStateUpdate(val consumed: Map<UniqueIdentifier, ContractState>, val produced: Map<UniqueIdentifier, ContractState>)
+
+class ContractStateUpdate(val consumed: Map<StateRef, ContractState>, val produced: Map<StateRef, ContractState>)
