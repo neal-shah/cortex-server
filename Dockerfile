@@ -20,4 +20,3 @@ VOLUME /opt/cortex/cordapps
 COPY build/libs/cortex-server.jar /opt/cortex/cortex-server.jar
 
 CMD ["java", "-jar", "/opt/cortex/cortex-server.jar"]
-CMD tail -f /dev/null
