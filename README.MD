@@ -9,7 +9,7 @@ Run using:
 docker run -p 8080:8080 -v "<cordapp-directory>":/opt/cortex/cordapps arhamill/cortex
 ```
 
-Where <cordapp-directory> is a folder containing your cordapp jars.
+Where `cordapp-directory` is a folder containing your cordapp jars.
 
 The following environment variables can be configured.
 
@@ -23,7 +23,7 @@ The following environment variables can be configured.
 <tr><td>CONFIG_RPC_PASSWORD</td><td>Corda RPC password</td><td>test</td></tr>
 <tr><td>CONFIG_RPC_HOST</td><td>Corda RPC host</td><td>host.docker.internal</td></tr>
 <tr><td>CONFIG_RPC_PORT</td><td>Corda RPC port</td><td>10006</td></tr>
-<tr><td>CORDAPP_DIRECTORY</td><td>Cordapp directory that Cortex will scan</td><td>/opt/cortex/cordapps</td></tr>
+<tr><td>CONFIG_RPC_CORDAPPS</td><td>Cordapp directory that Cortex will scan</td><td>/opt/cortex/cordapps</td></tr>
 </tbody>
 </table>
 
