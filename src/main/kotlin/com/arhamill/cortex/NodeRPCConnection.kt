@@ -4,6 +4,7 @@ import io.bluebank.braid.core.utils.toJarsClassLoader
 import net.corda.client.rpc.CordaRPCClient
 import net.corda.client.rpc.CordaRPCClientConfiguration
 import net.corda.client.rpc.CordaRPCConnection
+import net.corda.client.rpc.GracefulReconnect
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.node.services.vault.builder
 import net.corda.core.utilities.NetworkHostAndPort
@@ -30,7 +31,12 @@ class NodeRPCConnection(
         val rpcAddress = NetworkHostAndPort(host, rpcPort)
         val classloader = listOf(cordapps).toJarsClassLoader()
         val rpcClient = CordaRPCClient(hostAndPort = rpcAddress, classLoader = classloader)
-        rpcConnection = rpcClient.start(username, password)
+        val gracefulReconnect = GracefulReconnect(
+            { /* On Disconnect */  },
+            { /* On Reconnect */ },
+            3
+        )
+        rpcConnection = rpcClient.start(username, password, gracefulReconnect)
         proxy = rpcConnection.proxy
         cordappClassloader = classloader
     }
