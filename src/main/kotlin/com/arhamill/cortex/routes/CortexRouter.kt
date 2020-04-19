@@ -12,6 +12,9 @@ import org.springframework.web.reactive.function.server.router
 class CortexRouter {
     @Bean
     fun routes(handler: CortexHandler): RouterFunction<ServerResponse> = router {
+        ("/me").nest {
+            GET("/", handler::whoAmI)
+        }
         ("/states").nest {
             accept(MediaType.APPLICATION_JSON).nest { POST("/", handler::snapshot) }
             accept(MediaType.TEXT_EVENT_STREAM).nest { POST("/updates", handler::updates) }

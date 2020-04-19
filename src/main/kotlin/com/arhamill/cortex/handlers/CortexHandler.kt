@@ -23,6 +23,12 @@ class CortexHandler(rpc: NodeRPCConnection) {
     private val proxy = rpc.proxy
     private val classloader = rpc.cordappClassloader
 
+    fun whoAmI(request: ServerRequest): Mono<ServerResponse> {
+        return ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(toPublisher(Single.just(proxy.nodeInfo().legalIdentities.first().name.toString())), ParameterizedTypeReference.forType(String::class.java))
+    }
+
     fun snapshot(request: ServerRequest): Mono<ServerResponse> = request.bodyToMono(String::class.java).flatMap {
         val clazz = Class.forName(it, true, classloader).asSubclass(ContractState::class.java)
         ok()
