@@ -40,3 +40,9 @@ Then start the server using:
 ```$bash
 java -jar build/lib/cortex-server.jar
 ```
+
+## Routes
+
+| URL 	| Method 	| URL Params 	| Data Params 	| Success Response                              	| Error Response 	|
+|-----	|--------	|------------	|-------------	|-----------------------------------------------	|----------------	|
+| /me 	| GET    	| None       	| None        	| Code: 200, Content: `O=BankA, L=London, C=GB` 	| Code: 404      	|
